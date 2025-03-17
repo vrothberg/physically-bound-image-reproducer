@@ -1,0 +1,16 @@
+FROM registry.stage.redhat.io/rhel9/rhel-bootc:9.6
+
+COPY ./embed_image.sh /usr/bin/
+COPY ./copy_embedded_images.sh /usr/bin/
+
+RUN <<PULL
+mkdir -p /opt/image-cache
+podman --root=/opt/image-cache images > /dev/null
+/usr/bin/embed_image.sh registry.fedoraproject.org/fedora:latest
+/usr/bin/embed_image.sh docker.io/library/busybox:latest
+/usr/bin/embed_image.sh docker.io/library/ubuntu:latest
+PULL
+
+COPY ./Containerfile.workaround /etc/containers/Containerfile
+COPY ./reproducer.sh /usr/bin/reproducer.sh
+
